@@ -1,7 +1,10 @@
 
 ## release
-　　当线程获取锁后，执行完相应逻辑后就需要释放锁，AQS 提供了 release(int arg) 方法释放锁。该方法同样是先调用由子类实现的 tryRelease(int arg) 方法来释放锁，释放成功后，会调用 unparkSuccessor(Node node) 方法唤醒下一个节点。
-  
+　　当前线程获取同步状态，并完成逻辑处理后，就需要释放同步状态。release 方法包含两个步骤：
+
+- tryRelease，由子类继承实现，释放独占锁的同步状态；
+- unparkSuccessor，释放成功后，会调用该方法唤醒下一个节点。然后下个节点从阻塞状态唤醒，尝试调用 acquire 方法获取独占锁；
+
 ```java
 public final boolean release(int arg) {
     if (tryRelease(arg)) {
@@ -42,7 +45,7 @@ private void unparkSuccessor(Node node) {
                 s = t;
     }
     if (s != null)
-        // 唤醒下个节点
+        // 唤醒节点的线程
         LockSupport.unpark(s.thread);
 }
 ```
