@@ -1,8 +1,8 @@
 
 ## AbstractQueuedSynchronizer
 　　AbstractQueuedSynchronizer，AQS 即队列同步器。它是一个框架，用来构建锁或其他同步组件的基础框架，使用方法是继承，即子类通过继承同步器并实现它的抽象方法来管理同步状态，通过内置的先进先出（FIFO）队列来完成资源获取线程的排队工作，使用到 AQS 的子类有 [ReentrantLock]()、[Semaphore]()、[CountDownLatch]() 等。 <br />
-　　同步器提供的三个方法来获取和修改同步状态，getState()、setState(int newState) 和 compareAndSetState(int expect, int update) 这三个方法能够保证状态的改变是安全的。
-　　AQS 框架用到了模板方法模式，部分方法交由子类实现，AQS 框架简化锁的实现方式，负责管理同步状态、线程的排队、等待与唤醒线程，子类继承 AQS，只需实现模板方法中的同步方法。比如 [acuqire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md) 独占锁方法，子类只需实现 tryAcquire 方法，其他流程，如获取同步状态失败，将当前线程包装成节点，添加到队列中则由 acuqire 方法实现。即子类继承 AQS 框架重写指定的方法（如 tryAcquire），在调用同步器的模板方法（如 acuqire），则会调用子类重写的方法（tryAcquire）。
+　　同步器提供的三个方法来获取和修改同步状态，getState()、setState(int newState) 和 compareAndSetState(int expect, int update) 这三个方法能够保证状态的改变是安全的。<br />
+　　AQS 框架用到了模板方法模式，部分方法交由子类实现，AQS 框架简化锁的实现方式，负责管理同步状态、线程的排队、等待与唤醒线程，子类继承 AQS，只需实现模板方法中的同步方法。比如 [acuqire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md) 独占锁方法，子类只需实现 tryAcquire 方法，其他流程，如获取同步状态失败，将当前线程包装成节点，添加到队列中则由 acuqire 方法实现。即子类继承 AQS 框架重写指定的方法（如 tryAcquire），在调用同步器的模板方法（如 acuqire），则会调用子类重写的方法（tryAcquire）。<br />
  　　AQS 框架提供的模板方法分为三类：独占式锁的获取和释放、共享式锁的获取和释放、查询同步队列中的等待线程。
 
 ```java
