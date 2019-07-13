@@ -1,16 +1,16 @@
 
 ## acquireInterruptibly
-　　AQS 提供了 acquireInterruptibly(int arg) 方法，即独占式获取响应中断。该方法在等待获取同步状态时，如果当前线程被中断了，会立刻响应中断抛出异常 InterruptedException。
+　　AQS 提供了 acquireInterruptibly(int arg) 方法，即独占式获取响应中断。该方法在节点等待获取同步状态时，如果当前线程被中断了，会立刻响应中断抛出异常 InterruptedException。
 
 ### acquireInterruptibly
-　　首先校验该线程是否已经中断了，如果是则抛出 InterruptedException，否则执行 tryAcquire(int arg) 方法尝试获取锁，如果获取成功，则直接返回，否则执行 doAcquireInterruptibly(int arg) 将线程包装成节点，进入队列中。
+　　首先检查该线程是否已经中断了，如果是则抛出异常 InterruptedException，否则执行 tryAcquire(int arg) 方法尝试获取锁，如果获取成功，则直接返回，否则执行 doAcquireInterruptibly(int arg) 将线程包装成节点，添加到队列末尾中。
 
 ```java
 public final void acquireInterruptibly(int arg) throws InterruptedException {
     // 线程中断，则抛出异常
     if (Thread.interrupted())
         throw new InterruptedException();
-    // 为 false，即锁获取不到时，执行 doAcquireInterruptibly
+    // 为 false，即获取不到同步状态时，执行 doAcquireInterruptibly
     if (!tryAcquire(arg))
         doAcquireInterruptibly(arg);
 }
