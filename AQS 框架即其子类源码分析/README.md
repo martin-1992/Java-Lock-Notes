@@ -1,13 +1,13 @@
 # java_concurrent_locks_analysis
 
-## [AbstractQueuedSynchronizer](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/AbstractQueuedSynchronizer.md)
+## [AbstractQueuedSynchronizer](https://github.com/martin-1992/Java-Lock-Notes/tree/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/AbstractQueuedSynchronizer)
 　　AbstractQueuedSynchronizer，AQS 即队列同步器。它是一个框架，使用方法是继承，即子类通过继承同步器并实现它的抽象方法来管理同步状态，使用到 AQS 的子类有 ReentrantLock、Semaphore、CountDownLatch 等。 <br />
 　　之所以将 AQS 称做框架，是因为它使用[模板设计方法](https://github.com/martin-1992/head_first_design_patterns_notebook/blob/master/chapter_8/chapter_8.md)，实现了大部分细节，包括 FIFO 队列、将线程包装成节点、阻塞线程等。有独占式锁和共享式锁，非公平锁和公平锁则由子类通过实现 tryAcquire 或 tryAcquireShared。比如 子类 ReentrantLock 实现 tryAcquire，包含公平独占锁和非公平独占锁。
 
 ### 独占式锁
-- [acquire](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md)，独占式获取锁。对中断不敏感，即对线程进行中断操作后，该线程会依然在 CLH 同步队列中等待获取同步状态（锁）；
-- [acquireInterruptibly](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquireInterruptibly.md)，独占式获取响应中断。在 acquire 原有基础上，加上线程中断则抛出异常；
-- [tryAcquireNanos](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/tryAcquireNanos.md)，独占式超时获取。在 acquireInterruptibly 的中断基础上，加入超时控制，即判断线程在指定时间是否获得锁。
+- [acquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md)，独占式获取锁。对中断不敏感，即对线程进行中断操作后，该线程会依然在 CLH 同步队列中等待获取同步状态（锁）；
+- [acquireInterruptibly](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquireInterruptibly.md)，独占式获取响应中断。在 acquire 原有基础上，加上线程中断则抛出异常；
+- [tryAcquireNanos](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/tryAcquireNanos.md)，独占式超时获取。在 acquireInterruptibly 的中断基础上，加入超时控制，即判断线程在指定时间是否获得锁。
 
 ### 共享式锁
 
