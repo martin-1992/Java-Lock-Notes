@@ -53,8 +53,8 @@ final boolean acquireQueued(final Node node, int arg) {
         for (;;) {
             // 获取前一个节点
             final Node p = node.predecessor();
-            // 判断前节点是否为头节点，如果为头节点，存在两种情况，一种为头节点使用同步状态，另一种为头节点已经释放同步状态，为空
-            // 节点，这时再次调用 tryAcquire 尝试获取同步状态
+            // 判断前节点是否为头节点，如果为头节点，存在两种情况，一种为头节点使用同步状态，另一种为头节点已
+            // 经释放同步状态，为空节点，这时再次调用 tryAcquire 尝试获取同步状态
             if (p == head && tryAcquire(arg)) {
                 // 当前节点获取同步成功，将当前节点设置为新的头节点
                 setHead(node);
