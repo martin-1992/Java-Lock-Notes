@@ -12,8 +12,8 @@
 ### 共享式锁
 
 ### 阻塞释放线程
-- [release](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/release.md)，释放锁，唤醒下一个节点（线程）尝试获取锁；
-- [shouldParkAfterFailedAcquire](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/shouldParkAfterFailedAcquire.md)，当前节点（线程）获取锁失败后，给前节点打上 SIGNAL 标识，这样当前线程会被阻塞。直到前节点在释放锁后，会根据这个标识来决定是否唤醒当前节点（线程）来获得锁。
+- [release](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/release.md)，释放锁，唤醒下一个节点（线程）尝试获取锁；
+- [shouldParkAfterFailedAcquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/shouldParkAfterFailedAcquire.md)，当前节点（线程）获取锁失败后，给前节点打上 SIGNAL 标识，这样当前线程会被阻塞。直到前节点在释放锁后，会根据这个标识来决定是否唤醒当前节点（线程）来获得锁。
 
 ### 子类实现
 - [ReentrantLock](https://github.com/martin-1992/java_concurrent_locks_analysis/blob/master/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/ReentrantLock.md)，继承 AQS 框架，实现 tryAcquire 方法，包含公平模式和非公平模式获取独占锁；
