@@ -34,6 +34,7 @@
   
 ### reference:
 
+- [Java 并发编程的艺术-方腾飞](https://item.jd.com/11740734.html)
 - https://mp.weixin.qq.com/s/-swOI_4_cxP5BBSD9wd0lA 
 - https://www.jianshu.com/p/279baac48960 
 - https://blog.csdn.net/vernonzheng/article/details/8275624
