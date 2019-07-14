@@ -35,7 +35,7 @@
 ### reference:
 
 - [Java 并发编程的艺术-方腾飞](https://item.jd.com/11740734.html)
-- https://mp.weixin.qq.com/s/-swOI_4_cxP5BBSD9wd0lA 
-- https://www.jianshu.com/p/279baac48960 
-- https://blog.csdn.net/vernonzheng/article/details/8275624
-- https://www.jianshu.com/p/3f3417dbcac4 
+- [【死磕Java并发】—– J.U.C 之 AQS](https://mp.weixin.qq.com/s/-swOI_4_cxP5BBSD9wd0lA)
+- [java AQS的实现原理](https://www.jianshu.com/p/279baac48960)
+- [Java多线程（七）之同步器基础：AQS框架深入分析](https://blog.csdn.net/vernonzheng/article/details/8275624)
+- [ReentrantLock 源码分析 (基于Java 8)](https://www.jianshu.com/p/3f3417dbcac4)
