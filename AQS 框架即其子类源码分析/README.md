@@ -5,9 +5,9 @@
 　　之所以将 AQS 称做框架，是因为它使用[模板设计模式](https://github.com/martin-1992/head_first_design_patterns_notebook/tree/master/chapter_8)，实现了大部分细节，包括 FIFO 队列、将线程包装成节点、阻塞线程等。有独占式锁和共享式锁，非公平锁和公平锁则由子类通过实现 tryAcquire 或 tryAcquireShared。比如 子类 ReentrantLock 实现 tryAcquire，包含公平独占锁和非公平独占锁。
 
 ### 独占式锁
-- [acquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md)，独占式获取锁。对中断不敏感，即对线程进行中断操作后，该线程会依然留在同步队列中等待获取同步状态（锁）；
-- [acquireInterruptibly](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquireInterruptibly.md)，独占式获取响应中断。在 acquire 原有基础上，加上线程中断则抛出异常；
-- [tryAcquireNanos](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/tryAcquireNanos.md)，独占式超时获取。在 acquireInterruptibly 的中断基础上，加入超时控制，即判断线程在指定时间是否获得锁。
+- [acquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md)，独占式获取同步状态（锁）。对中断不敏感，即对线程进行中断操作后，该线程会依然留在同步队列中等待获取同步状态（锁）；
+- [acquireInterruptibly](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquireInterruptibly.md)，独占式获取同步状态状态响应中断。在 acquire 原有基础上，加上线程中断则抛出异常，这样被中断抛出异常的线程就不会在同步队列中获取同步状态；
+- [tryAcquireNanos](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/tryAcquireNanos.md)，独占式超时获取同步状态。在 acquireInterruptibly 的中断基础上，加入超时控制，即判断线程在指定时间是否获得锁。
 
 ### 共享式锁
 - [acquireShared](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%85%B1%E4%BA%AB%E5%BC%8F%E9%94%81/acquireShared.md)，共享式获取锁，对中断不敏感。
