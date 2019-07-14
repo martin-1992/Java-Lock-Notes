@@ -17,13 +17,16 @@ public final boolean tryAcquireNanos(int arg, long nanosTimeout)
 }
 ```
 
-### doAcquireInterruptibly
+### doAcquireNanos
+　　该方法在自旋过程中，会尝试获取同步状态，获取失败，则计算是否超时。超时则直接返回 false，没超时则进入阻塞状态，直到超时返回 false。
 
-- 计算超时时间，超时则返回 false；
-- 如没超时，但接近超时（小于 spinForTimeoutThreshold），则直接自旋超时返回 false，因为调用 LockSupport 需要开销；
+- addWaiter，将当前线程包装成节点，加入到队列中，模式为独占式；
+- tryAcquire，获取当前节点的前一个节点，如果前节点为头节点，尝试获取同步状态；
+- setHead，获取同步状态成功，则设置当前节点为新的头节点，删除旧的头节点；
+- 获取失败，计算时间，超时则中断自旋，返回 false；
+- 如没超时，但接近超时（小于 spinForTimeoutThreshold，默认 1000 纳秒），则不调用 LockSupport，因为调用 LockSupport 需要开销。而是进入无条件的快速自旋，等待超时返回 false；
 - 没超时，且剩余时间大于 spinForTimeoutThreshold，则使用 LockSupport 使当前节点（线程）进入阻塞状态。
-　　
-  
+
 ```java
 static final long spinForTimeoutThreshold = 1000L;
 
@@ -32,14 +35,17 @@ private boolean doAcquireNanos(int arg, long nanosTimeout) throws InterruptedExc
         return false;
     // 截止时间
     final long deadline = System.nanoTime() + nanosTimeout;
-    // 将当前线程保证成节点，加入到队列中
+    // 将当前线程包装成节点，加入到队列中，模式为独占式
     final Node node = addWaiter(Node.EXCLUSIVE);
     boolean failed = true;
     try {
         // 自旋
         for (;;) {
+            // 获取当前节点的前一个节点
             final Node p = node.predecessor();
+            // 如果前节点为头节点，尝试获取同步状态
             if (p == head && tryAcquire(arg)) {
+                // 获取同步状态成功，则设置当前节点为新的头节点，删除旧的头节点
                 setHead(node);
                 p.next = null; // help GC
                 failed = false;
@@ -51,7 +57,7 @@ private boolean doAcquireNanos(int arg, long nanosTimeout) throws InterruptedExc
                 // 超时则返回 false
                 return false;
             // 若没超时, 并且大于 spinForTimeoutThreshold, 则线程被阻塞，等待唤醒，这里没超时
-            // 但小于spinForTimeoutThreshold, 是直接自旋, 因为效率更高，调用 LockSupport 是
+            // 但小于 spinForTimeoutThreshold, 是直接自旋, 因为效率更高，调用 LockSupport 是
             // 需要开销的
             if (shouldParkAfterFailedAcquire(p, node) &&
                 nanosTimeout > spinForTimeoutThreshold)
@@ -66,3 +72,7 @@ private boolean doAcquireNanos(int arg, long nanosTimeout) throws InterruptedExc
     }
 }
 ```
+
+　　独占式超时获取同步状态的流程图如下：
+
+![avatar](photo_3.png)
