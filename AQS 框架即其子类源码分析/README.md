@@ -10,7 +10,7 @@
 - [tryAcquireNanos](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/tryAcquireNanos.md)，独占式超时获取。在 acquireInterruptibly 的中断基础上，加入超时控制，即判断线程在指定时间是否获得锁。
 
 ### 共享式锁
-- [共享式获取锁和释放锁](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%85%B1%E4%BA%AB%E5%BC%8F%E9%94%81/acquireShared.md)，共享式获取锁，对中断不敏感。
+- [acquireShared](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%85%B1%E4%BA%AB%E5%BC%8F%E9%94%81/acquireShared.md)，共享式获取锁，对中断不敏感。
 
 ### 阻塞释放线程
 - [release](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/release.md)，释放锁，唤醒下一个节点（线程）尝试获取锁；
