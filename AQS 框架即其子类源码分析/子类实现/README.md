@@ -1,9 +1,10 @@
-
 ## ReentrantLock
-　　ReentrantLock 默认是使用非公平锁。
+　　ReentrantLock 为重入锁，即该锁能支持一个线程对资源的重复加锁。ReentrantLock 分为公平式和非公平式，默认是使用非公平锁。<br />
+　　synchronized 支持隐式的重入锁，而 ReentrantLock 在调用 lock() 进行上锁时，已经获取锁的线程，能够再次调用 lock() 方法获取而不被阻塞。
 
 ```java
 public ReentrantLock() {
+    // 默认非公平锁
     sync = new NonfairSync();
 }
 
