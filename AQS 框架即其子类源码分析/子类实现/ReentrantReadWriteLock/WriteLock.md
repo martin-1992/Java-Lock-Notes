@@ -25,9 +25,6 @@ public static class WriteLock implements Lock, java.io.Serializable {
         sync.acquireInterruptibly(1);
     }
 
-    /**
-     * 
-     */
     public boolean tryLock( ) {
         return sync.tryWriteLock();
     }
@@ -47,9 +44,6 @@ public static class WriteLock implements Lock, java.io.Serializable {
         sync.release(1);
     }
 
-    /**
-     * 
-     */
     public Condition newCondition() {
         return sync.newCondition();
     }
@@ -61,9 +55,6 @@ public static class WriteLock implements Lock, java.io.Serializable {
                                    "[Locked by thread " + o.getName() + "]");
     }
 
-    /**
-     * 
-     */
     public boolean isHeldByCurrentThread() {
         return sync.isHeldExclusively();
     }
@@ -79,33 +70,51 @@ public static class WriteLock implements Lock, java.io.Serializable {
 
 ### tryAcquire
 　　写锁使用独占式，保证多线程下，只有一个线程能获得。
-  
-  
+
+- 获取当前线程、同步状态；
+- 如果同步状态不为 0，表示有线程持有读锁或写锁，再进行判断；
+    1. w == 0，表示有线程持有读锁，这时无法获取写锁，返回 false。执行 AQS#acquire 方法的后续流程，将当前线程包装成节点，添加到同步队列末尾；
+    2. 写锁数不为 0，有线程持有写锁，判断如果不是当前线程持有写锁，返回 false。同上执行 AQS#acquire 方法的后续流程；
+    3. 先判断加上新的写锁数，是否会溢出，溢出则抛出异常；
+    4. 当前线程持着写锁，则更新写锁计数，因为写锁只有一个线程持有，所以不用使用 CAS。
+- 如果同步状态为 0，表示读锁和写锁的持有数都为 0。writerShouldBlock，为抽象方法。分别为公平锁 [ReentrantReadWriteLock#FairSync]() 和非公平锁[ReentrantReadWriteLock#NonfairSync]()，这时根据公平式和非公平式分两种情况；
+    1. 公平式，会先判断同步队列是否有线程在等待，是则返回 false。执行 AQS#acquire 方法的后续流程；
+    2. 非公平式，尝试执行 CAS 获取同步状态，获取成功，返回 true。
+ 
 ```java
+// 根据同步状态计算写锁数量
+static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }
+
+// 为抽象方法，有两种实现方法，分别为公平锁 ReentrantReadWriteLock#FairSync 
+// 和非公平锁 ReentrantReadWriteLock#NonfairSync
+abstract boolean writerShouldBlock();
+
 protected final boolean tryAcquire(int acquires) {
     // 当前线程
     Thread current = Thread.currentThread();
-    // 调用 AQS 方法，获取当前节点（线程）的状态
+    // 调用 AQS 方法，获取同步状态
     int c = getState();
-    // 节点低位为写锁数量，高位为读锁数量
+    // 根据同步状态计算写锁数量
     int w = exclusiveCount(c);
     if (c != 0) {
-        // 写锁数量为 0，即没有线程持有写锁；c 不等于 0，表示有线程持有读锁或写锁，且
-        // 不是当前线程持有的。只要有读锁或写锁被占用，则不能获取到写锁
+        // c 不等于 0，表示有线程持有读锁或写锁。然后 w == 0，表示写锁数量为 0，综合起来
+        // 是有线程持有读锁，这时无法获取写锁，返回 false。第二种情况是写锁数量不为 0，但
+        // 不是当前线程持有写锁，返回 false，不能获取写锁
         if (w == 0 || current != getExclusiveOwnerThread())
             return false;
         // 溢出抛出异常
         if (w + exclusiveCount(acquires) > MAX_COUNT)
             throw new Error("Maximum lock count exceeded");
-        // 更新重入数量，不需要使用 CAS，因为写锁只有一个线程能持有
+        // 当前线程持着写锁，则更新写锁计数，因为写锁只有一个线程持有，所以不用使用 CAS
         setState(c + acquires);
         return true;
     }
-    // c 为 0，表示读锁和写锁都为 0，如果写锁不阻塞，且用 CAS 尝试获取写锁，
-    // 获取成功，则设置当前线程为获取写锁的线程
+    // 非公平锁这里 writerShouldBlock 会返回 false，然后调用 CAS 成功获取同步状态，则会
+    // 设置当前线程持有同步状态，并返回 true
     if (writerShouldBlock() ||
         !compareAndSetState(c, c + acquires))
         return false;
+    // 写锁不阻塞
     setExclusiveOwnerThread(current);
     return true;
 }
