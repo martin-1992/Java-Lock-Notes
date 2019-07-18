@@ -24,3 +24,13 @@
 }
 ```
 
+### [WriteLock](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/ReentrantReadWriteLock/WriteLock.md)
+　　写锁是一个支持重进入的排它锁。
+
+- 如果当前线程没有获取写锁，且当前线程获得读锁或其他线程获得读写锁，则当前线程包装成节点添加到同步队列末尾；
+- 如果当前线程获得写锁，则增加写状态。
+
+　　如果存在读锁，则写锁不能获取，因为读写锁要确保写锁的操作对读锁可见。如果允许在已获取读锁的情况下，再获取写锁，那么正在运行的其他读线程就无法感知到当前写线程的操作，会出现数据库中的脏读、幻读这些。
+
+### [ReadLock](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/ReentrantReadWriteLock/ReadLock.md)
+　　
