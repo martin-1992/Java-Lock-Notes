@@ -40,7 +40,7 @@ protected boolean tryReleaseShared(int arg) {
 - 释放锁。修改同步状态，并且唤醒等待线程。
 
 ### 同步状态 state
-　　AQS 使用一个 int 类型的成员变量 state 来表示同步状态，即用于同步线程之间的共享状态，通过 CAS 和 volatile 保证其原子性和可见性。
+　　AQS 使用一个 int 类型的成员变量 state 来表示同步状态，即用于同步线程之间的共享状态，通过 CAS 和 volatile 保证其原子性和可见性。**使用 state 可实现重入锁，同一个锁对象可多次获取锁，避免死锁。**
   
 - state > 0 时，已经获取了锁；
 - state = 0 时，释放了锁。
