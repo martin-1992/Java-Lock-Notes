@@ -17,7 +17,9 @@
 - [shouldParkAfterFailedAcquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E9%98%BB%E5%A1%9E%E9%87%8A%E6%94%BE%E7%BA%BF%E7%A8%8B/shouldParkAfterFailedAcquire.md)，当前节点（线程）获取锁失败后，给前节点打上 SIGNAL 标识，这样当前线程会被阻塞。直到前节点在释放锁后，会根据这个标识来决定是否唤醒当前节点（线程）来获得锁。
 
 ### 子类实现
-- [ReentrantLock](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/README.md)，继承 AQS 框架，实现 tryAcquire 方法，包含公平模式和非公平模式获取独占锁；
+
+- [ReentrantLock](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/ReentrantLock/README.md)，继承 AQS 框架，实现 tryAcquire 方法，包含公平模式和非公平模式获取独占锁；
+- [ReentrantReadWriteLock](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E5%AD%90%E7%B1%BB%E5%AE%9E%E7%8E%B0/ReentrantReadWriteLock/README.md)，继承 AQS 框架，包含公平模式和非公平模式获取独占锁、读锁和写锁。
 
 ### 共享式锁与独占式锁的区别
 　　区别在于同一时刻是否有多个线程同时获取到同步状态，在独占锁 [acquire](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md) 分析过，当前节点会先判断前个节点是否为头节点，再尝试获取同步状态，其他节点的前节点不为头节点，则不会尝试获取同步状态，所以同一时刻只有当前节点的前节点为头节点，才会尝试获取同步状态。
