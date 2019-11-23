@@ -1,6 +1,6 @@
 ### rehash
 
-- 调用 [expungeStaleEntry]()，清除所有 key 为 null 的 Entry；
+- 调用 [expungeStaleEntry](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md)，清除所有 key 为 null 的 Entry；
 - 如果 size + threshold / 4 >= threshold，则扩容。
 
 ```java

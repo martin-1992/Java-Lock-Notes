@@ -4,7 +4,7 @@
 - 获取该 key（ThreadLocal）的哈希值，使用位运算获取索引下标；
 - 从当前索引 i 开始遍历，因为可能遇到哈希冲突，使用线性探测法；
 - 找到 key，则将 key 的软引用设为 null；
-- 调用 [expungeStaleEntry]()，清除所有 key 为 null 的 Entry。
+- 调用 [expungeStaleEntry](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md)，清除所有 key 为 null 的 Entry。
 
 ```java
     private void remove(ThreadLocal<?> key) {

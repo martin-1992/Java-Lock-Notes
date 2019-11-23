@@ -5,7 +5,7 @@
 - 哈希没冲突，key 相同，则新值覆盖旧值，返回；
 - 哈希冲突，key 不相同，则寻找下个索引下标值，重复步骤二的流程；
 - 如果遇到 key 为 null，则清除；
-- 如果没有可清除的 Entry，且数组长度达到负载值，则调用 [rehash]() 扩容。
+- 如果没有可清除的 Entry，且数组长度达到负载值，则调用 [rehash](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/rehash.md) 扩容。
 
 ```java
     private void set(ThreadLocal<?> key, Object value) {
@@ -40,7 +40,7 @@
 ```
 
 #### replaceStaleEntry
-　　找到 key，则新值替换旧值。没找到，则重新生成一个 Entry 对象，添加到数组中。遇到 key 为 null，调用 [expungeStaleEntry]() 进行清除。
+　　找到 key，则新值替换旧值。没找到，则重新生成一个 Entry 对象，添加到数组中。遇到 key 为 null，调用 [expungeStaleEntry](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md) 进行清除。
 
 ```java
     private void replaceStaleEntry(ThreadLocal<?> key, Object value,
@@ -96,7 +96,7 @@
 ```
 
 #### cleanSomeSlots
-　　遍历，调用 [expungeStaleEntries]() 清除那些 key 为 null，但 Entry 不为 null。
+　　遍历，调用 [expungeStaleEntries](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md) 清除那些 key 为 null，但 Entry 不为 null。
 
 ```java
     private boolean cleanSomeSlots(int i, int n) {
