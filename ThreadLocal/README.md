@@ -46,6 +46,9 @@ public class ThreadLocal<T> {
 }
 ```
 
+### 弱引用
+　　弱引用会在下次 GC 被回收，如果该对象仅仅被弱引用关联，即 ThreadLocalMap 中的 Entry 的 key 指向 ThreadLocal 时，没有其它指向 ThreadLocal，ThreadLocal 会被回收。ThreadLocal 被回收后，Entry 的 key 为 null，但 Entry 不为 null，因为 Entry 是强引用，Entry 的 值还存在，所以需要手动回收。
+
 ### [get](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/get.md)
 　　获取当前线程副本 ThreadLocalMap，根据当前线程 key（ThreadLoacal）获取对应的变量值。
 
