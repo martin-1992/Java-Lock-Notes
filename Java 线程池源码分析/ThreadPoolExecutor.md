@@ -1,8 +1,5 @@
-
-### rs 和 wc 组成 ctl
-
-　　ctl 可理解为单词 control 的简写，即控制，在下面代码中会简写为 c，是对线程池的运行状态和池子中的有效线程的数量进行控制的一个字段。ctl 是一个 AtomicInteger 对象，它的操作都是原子化，保证线程安全。<br />
-　　一个 ctl 包含两部分信息：
+### 线程生命周期管理
+　　ctl 是一个 AtomicInteger 对象，通过一个变量来维护两个信息，这样就不需要用锁来保证两个信息一致。<br />
 
 - rs（runState），线程池的运行状态，用 int 变量的高 3 位表示（int 为 32 位的二进制）；
 - wc（workerCount），线程池内有效线程的数量，用 int 变量的 低 29 位表示。
@@ -15,7 +12,8 @@
     private static final int CAPACITY   = (1 << COUNT_BITS) - 1;
 ```
 
-　　由于 ctl 变量是由 rs（线程池的运行状态）和 wc（线程池内有效线程的数量）这两个组合而成，所以，知道这两个值，就可以使用 ctlOf() 方法 计算出 ctl 的值。同理，这三个值，只要知道其中两个值，即可求出另外一个：
+　　由于 ctl 变量是由 rs（线程池的运行状态）和 wc（线程池内有效线程的数量）这两个组合而成，所以，知道这两个值，就可以使用 ctlOf() 方法计算出 ctl 的值。<br />
+　　同理，这三个值，只要知道其中两个值，即可求出另外一个，这里都使用位运算来获取，提高性能。
   
 ```java
     // 计算 rs，线程池的运行状态，高 3 位是 1，低 29 位是 0 的一个 int 型的数
@@ -28,12 +26,15 @@
 
 ### 线程池的运行状态
 
-- RUNNING（运行状态），能接受新提交的任务，并且也能处理阻塞队列中的任务；
-- SHUTDOWN（关闭状态），不接受新提交的任务，但可以继续处理阻塞队列中已保存的任务。在线程池处于 RUNNING 状态时，调用 shutdown() 方法会使线程池进入到该状态。当然，finalize() 方法在执行过程中或许也会隐式地进入该状态；
-- STOP，不能接受新提交的任务，也不能处理阻塞队列中已保存的任务，并且会中断正在处理中的任务。在线程池处于 RUNNING 或 SHUTDOWN 状态时，调用 shutdownNow() 方法会使线程池进入到该状态；
-- TIDYING（清理状态），所有任务都执行完，且当前线程池已没有有效的线程，这个时候线程池的状态将会 TIDYING，将调用 terminated() 方法。当线程池处于 SHUTDOWN 状态时，如果此后线程池内没有线程了并且阻塞队列内也没有待执行的任务了，线程池就会进入到该状态。当线程池处于 STOP 状态时，如果此后线程池内没有线程了，线程池就会进入到该状态；
-- TERMINATED（终止状态），terminated() 方法执行完后就进入该状态。
+- **RUNNING（运行状态），** 能接受新提交的任务，并且也能处理阻塞队列中的任务；
+- **SHUTDOWN（关闭状态），** 不接受新提交的任务，但可以继续处理阻塞队列中已保存的任务。在线程池处于 RUNNING 状态时，调用 shutdown() 方法会使线程池进入到该状态；
+- **STOP（停止状态），** 不能接受新提交的任务，也不能处理阻塞队列中已保存的任务，并且会中断正在处理中的任务。在线程池处于 RUNNING 或 SHUTDOWN 状态时，调用 shutdownNow() 方法会使线程池进入到该状态；
+- **TIDYING（清理状态），** 所有任务都执行完，且当前线程池已没有有效的线程，这个时候线程池的状态将会 TIDYING，将调用 terminated() 方法；
+    1. 当线程池处于 SHUTDOWN 状态时，如果此后线程池内没有线程了并且阻塞队列内也没有待执行的任务了，线程池就会进入到该状态；
+    2. 当线程池处于 STOP 状态时，如果此后线程池内没有线程了，线程池就会进入到该状态。
+- **TERMINATED（终止状态），** terminated() 方法执行完后就进入该状态。
 
+![avatar](photo_3.png)
 
 ```java
     // runState is stored in the high-order bits
@@ -49,10 +50,8 @@
     private static final int TERMINATED =  3 << COUNT_BITS;
 ```
 
-
 　　上面五个常量是按照从小到大的属性排列的，可通过比较大小判断出属于哪个状态。
   
-
 ```java
     private static boolean runStateLessThan(int c, int s) {
         return c < s;
@@ -69,7 +68,18 @@
 
 ### 构造函数 ThreadPoolExecutor
 　　ThreadPoolExecutor 有四个构造函数，但其实都是调用同一个构造函数。
-  
+
+- **corePoolSize，核心线程。** 表示线程池中一直存活的最小线程数量。默认情况下，不会主动创建核心线程，而是有任务进来时，才会去创建；
+- **maximumPoolSize，最大线程数。** 最大不能超过 CAPACITY 值，即 1 << 29 - 1。在通过方法 execute(Runnable) 提交一个任务到线程池时，会判断运行状态（RUNNING）的线程数量与核心线程数（corePoolSize）的大小；
+    1. 当前线程池运行的线程少于 corePoolSize，则会创建一个核心线程来处理新任务；
+    2. 当前线程池运行的线程大于 corePoolSize，会先尝试添加到阻塞队列 workQueue 中。如果队列已满，且线程池中的线程要小于 maximumPoolSize则会创建一个线程来执行。
+- **keepAliveTime，空闲线程的等待时间。** 超过该时间，该线程就会停止工作；
+    1. allowCoreThreadTimeOut=true，核心线程和非核心线程超时，停止工作，回收线程；
+    2. allowCoreThreadTimeOut=false，非核心线程超时会停止工作，核心线程超时不会停止工作。
+- **workQueue，阻塞队列。** 当线程池中的核心线程都在处理任务，新任务（Runnable）会先添加到阻塞队列中，它是一种类似 "生产者-消费者" 模型的队列；
+- **threadFactory，线程工厂。** 用于创建线程，默认使用 Executors.defaultThreadFactory() 来创建线程工厂；
+- **handler，拒绝策略。** 调用 handler 的 rejectedExecution 方法，用于拒绝新任务执行。
+
 ```java
     // 核心线程数
     private volatile int corePoolSize;
@@ -110,78 +120,8 @@
         this.threadFactory = threadFactory;
         this.handler = handler;
     }
-```  
-
-#### corePoolSize
-　　核心线程，表示线程池中一直存活的最小线程数量。默认情况下，核心线程是按需创建启动的，只有当线程池接收到任务请求后，才会去创建并启动一定数量的核心线程来执行任务。而如果没有接收到相关任务，则不会主动创建核心线程，有助于降低系统资源的消耗。也可调用 prestartCoreThread() 或 prestartAllCoreThreads() 方法，在初始时线程池就创建启动一个或所有核心线程。
-  
-#### maximumPoolSize
-　　线程池内能够容纳线程数量的最大值，最大不能超过 CAPACITY 值，即 1 << 29 - 1。如果将线程池的核心线程数 corePoolSize 和最大线程数 maximumPoolSize 设置为相同的数值，即线程池中的所有线程都是核心线程，那么该线程池就是一个容量固定的线程池。当通过方法 execute(Runnable) 提交一个任务到线程池时，会判断运行状态（RUNNING）的线程数量与核心线程数（corePoolSize）的大小：
-  
-- 运行状态的线程数少于核心线程数，那么即使有一些非核心线程处于空闲等待状态，系统也会倾向于创建一个新的线程来处理这个任务；
-- 运行状态的线程数大于核心线程数，但小于最大线程数，系统会先判断线程池内部的阻塞队列 workQueue 中是否还有空位，如果发现有空位，系统会将该任务先存入阻塞队列。没空位，即队列已满，则会创建一个线程来执行该任务。  
-
-#### keepAliveTime
-　　表示空闲线程处于等待状态的超时时间，超过该时间，该线程就会停止工作。
-
-- 当 allowCoreThreadTimeOut 设为 false，总线程数大于核心线程数时，多出来的非核心线程一旦进入到空闲等待状态，会开始计算各自的等待时间，超过 keepAliveTime 时，该线程就会停止工作（terminated）。核心线程不受此限制，即使超时，也不会停止工作；
-- 当 allowCoreThreadTimeOut 设为 true 时，无论是非核心线程还是核心线程，一旦超时，就会停止工作。
-
-#### workQueue
-　　是一个内部元素为 Runnable（各种任务，通常是异步的任务） 的阻塞队列 BlockingQueue。阻塞队列是一种类似于“生产者-消费者”模型的队列，当队列已满时，如果继续向队列中插入元素，该插入操作将会被阻塞一直处于等待状态，直到队列中有元素被移除产生空位后，才能执行插入操作。当队列为空时，如果继续执行元素的删除或获取操作，该操作同样会被被阻塞而进入等待状态，直到队列中又有了该元素后，才有可能执行该操作。
-  
-#### threadFactory
-　　线程工厂，用于创建线程。创建线程池的时候未指定 threadFactory，则默认使用 Executors.defaultThreadFactory() 方法来创建线程工厂。
-  
-#### handler  
-　　拒绝策略。以下两个条件满足其中任意一个的时候，如果继续向该线程池中提交新的任务，线程池将会调用 handler 的 rejectedExecution 方法，表示拒绝执行这些新提交的任务：
-
-- 当线程池处于 SHUTDOWN（关闭）状态时，无论线程池和阻塞队列是否都已满；
-- 当线程池中的所有线程都处于运行状态并且线程池中的阻塞队列已满时。
-
-
-
-### execute
-　　创建 Worker 对象，为执行任务的线程。
-  
-- 如果当前正在执行的 Worker 数量比 corePoolSize（核心线程）要小，调用 [addWorker](https://github.com/martin-1992/thread_pool_executor_analysis/blob/master/addWorker.md) 方法，直接创建一个新的 Worker 处理执行阻塞队列中的任务；
-- 如果当前正在执行的 Worker 数量大于等于 corePoolSize，将任务放到阻塞队列里，如果阻塞队列没满并且状态是 RUNNING 的话，直接丢到阻塞队列，否则执行第3步。
-    1. 丢到阻塞队列之后，还需要再做一次验证（丢到阻塞队列之后可能另外一个线程关闭了线程池或者刚刚加入到队列的线程死了），如果这个时候线程池不在 RUNNING 状态，把刚刚丢入队列的任务 remove 掉，调用 reject 方法；
-    2. 否则查看 Worker 数量，如果 Worker 数量为0，起一个新的 Worker 去阻塞队列里拿任务执行；
-- 丢到阻塞失败的话，会调用 addWorker 方法尝试起一个新的 Worker 去阻塞队列拿任务并执行任务，如果这个新的 Worker 创建失败，调用 reject 方法。
-
-
-```java
-    public void execute(Runnable command) {
-        if (command == null)
-            throw new NullPointerException();
-        
-        // 获取 ctl 的值
-        int c = ctl.get();
-        // 如果线程池中的有效线程数小于核心线程数，调用 addWorker 方法创建一个新的 Worker 来执行任务，
-        // 这里 true 为使用核心线程的数量，false 使用最大线程数量
-        if (workerCountOf(c) < corePoolSize) {
-            if (addWorker(command, true))
-                return;
-            c = ctl.get();
-        }
-        //线程池的有效线程数大于核心线程数，线程池在 Running 状态，阻塞队列也没满（使用 offer 方法来判断，
-        // true 表示队列没满成功添加，false 表示队列已满添加失败）
-        if (isRunning(c) && workQueue.offer(command)) {
-            int recheck = ctl.get();
-            // 再对线程池做一次判断，防止出现线程突然关闭的情况，如果线程不在 Running 状态，
-            // 使用 remove 方法移除掉刚刚入队列的任务，调用 reject 方法对新任务执行该拒绝策略
-            if (! isRunning(recheck) && remove(command))
-                reject(command);
-            // 线程池的有效数量为 0，创建 Worker 去阻塞队列里拿任务执行
-            else if (workerCountOf(recheck) == 0)
-                addWorker(null, false);
-        }
-        // addWorker 创建 Worker 失败，则调用 reject 方法，false 为最大线程池的大小
-        else if (!addWorker(command, false))
-            reject(command);
-    }
 ```
+
 
 #### remove
 

@@ -1,25 +1,23 @@
+### processWorkerExit
+　　该方法是在 [runWorker()]() 中调用的，将线程 worker 从线程集合 workers 中移除，让 JVM 去回收。
 
-## processWorkerExit
-　　判断 Worker 是否正常结束，非正常结束则进行处理。
-
-- 判断 Worker 是否正常结束，非正常结束调用 decrementWorkerCount；
-- 从线程池的 Worker 集合移除掉该 Worker，进行回收；
+- 判断 Worker 是否正常结束，非正常结束 completedAbruptly 则调用 decrementWorkerCount，线程数 ctl 减一；
+- 上锁，从线程池 workers 移除掉该线程 Worker，进行回收；
 - [tryTerminate()](https://github.com/martin-1992/thread_pool_executor_analysis/blob/master/tryTerminate.md)，检查线程池是否满足条件，是则终止线程池的运行；
 - 如 Worker 处于正常运行，且 Worker 是正常结束。判断 Worker 数量与核心线程数量的大小关系，大于则不需要创建 Worker。当 Worker 执行任务出现异常，Worker 数量小于核心线程的数量，新创建一个 Worker 替代原先的 Worker。
 
-
 ```java
     private void processWorkerExit(Worker w, boolean completedAbruptly) {
-        // 如果 Worker 没有正常结束流程调用 processWorkerExit 方法，Worker 数量减一。
-        // 如果是正常结束的话，在 getTask 方法里 Worker 数量已减一
-        if (completedAbruptly) // If abrupt, then workerCount wasn't adjusted
+        // 在 runWorker 中，如果没有执行任务，则 completedAbruptly 为 true，线程数 ctl 减一，
+        // 只有当执行了任务，completedAbruptly 为 false，线程数不减
+        if (completedAbruptly)
             decrementWorkerCount();
         
-        // 上锁
+        // 上锁，从 hashset 中移除掉指定线程 worker
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            // 加上 Worker 完成的任务数，求得总的完成任务数
+            // 加上 Worker 完成的任务数，计算总的完成任务数
             completedTaskCount += w.completedTasks;
             // 从线程池的 Worker 集合移除掉需要回收的 Worker
             workers.remove(w);
@@ -42,7 +40,7 @@
                     min = 1;
                 // 如果 Worker 数量大于核心线程的数量，则不需要创建 Worker
                 if (workerCountOf(c) >= min)
-                    return; // replacement not needed
+                    return;
             }
             // 当 Worker 执行任务出现异常，Worker 数量小于核心线程的数量，
             // 新创建一个 Worker 替代原先的 Worker
@@ -52,10 +50,14 @@
 ```
 
 ### decrementWorkerCount
-　　调用 CAS 使得 Worker 线程数减一。
+　　使用 CAS 使得线程数 ctl 减一。
 
 ```java
     private void decrementWorkerCount() {
         do {} while (! compareAndDecrementWorkerCount(ctl.get()));
+    }
+    
+    private boolean compareAndDecrementWorkerCount(int expect) {
+        return ctl.compareAndSet(expect, expect - 1);
     }
 ```
