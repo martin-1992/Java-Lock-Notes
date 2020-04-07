@@ -1,10 +1,10 @@
 ### processWorkerExit
-　　该方法是在 [runWorker()]() 中调用的，将线程 worker 从线程集合 workers 中移除，让 JVM 去回收。
+　　该方法是在 [runWorker()](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/runWorker.md) 中调用的，将线程 worker 从线程池 workers 中移除，让 JVM 去回收。
 
-- 判断 Worker 是否正常结束，非正常结束 completedAbruptly 则调用 decrementWorkerCount，线程数 ctl 减一；
+- 判断 Worker 是否正常结束，非正常结束 completedAbruptly=true 则调用 decrementWorkerCount，线程数 ctl 减一；
 - 上锁，从线程池 workers 移除掉该线程 Worker，进行回收；
-- [tryTerminate()](https://github.com/martin-1992/thread_pool_executor_analysis/blob/master/tryTerminate.md)，检查线程池是否满足条件，是则终止线程池的运行；
-- 如 Worker 处于正常运行，且 Worker 是正常结束。判断 Worker 数量与核心线程数量的大小关系，大于则不需要创建 Worker。当 Worker 执行任务出现异常，Worker 数量小于核心线程的数量，新创建一个 Worker 替代原先的 Worker。
+- [tryTerminate()](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/tryTerminate.md)，检查线程池是否满足条件，是则终止线程池的运行；
+- 如 Worker 处于正常运行，且 Worker 是正常结束。判断线程 Worker 数量与核心线程数量的大小关系，大于则不需要创建 Worker。当线程数小于核心线程的数量，新创建一个线程 worker。
 
 ```java
     private void processWorkerExit(Worker w, boolean completedAbruptly) {
@@ -13,7 +13,7 @@
         if (completedAbruptly)
             decrementWorkerCount();
         
-        // 上锁，从 hashset 中移除掉指定线程 worker
+        // 上锁，从线程池 workers 中移除掉指定线程 worker
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
@@ -35,7 +35,7 @@
             // Worker 是正常流程结束的
             if (!completedAbruptly) {
                 int min = allowCoreThreadTimeOut ? 0 : corePoolSize;
-                // 核心线程为 0，Wokrer 集合不为空，设置线程最小为 1
+                // 核心线程为 0，阻塞队列不为空，设置线程最小为 1
                 if (min == 0 && ! workQueue.isEmpty())
                     min = 1;
                 // 如果 Worker 数量大于核心线程的数量，则不需要创建 Worker
