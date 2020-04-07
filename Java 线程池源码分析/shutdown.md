@@ -1,10 +1,9 @@
-
-## shutdown
+### shutdown
 　　终止线程池的运行。
 　　
 - checkShutdownAccess()，首先检查关闭线程池的权限；
 - advanceRunState(SHUTDOWN)，把线程池状态更新为 SHUTDOWN；
-- interruptIdleWorkers，遍历 Worker 集合，中断空闲的 Worker；
+- [interruptIdleWorkers](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/tryTerminate.md)，遍历线程池 workers，中断空闲的的 worker；
 - onShutdown()，钩子方法，实现为空，默认不处理；
 - tryTerminate，检查线程池是否满足终止运行的条件，是则终止线程池的运行。
 
