@@ -1,12 +1,12 @@
 ### runWorker
-　　Worker.run() 方法调用的是 ThreadPoolExecutor#runWorker 方法，执行任务，任务来自 Worker 中封装的 task，如为空，则从阻塞队列中获取任务。
+　　Worker.run() 方法调用的是 ThreadPoolExecutor#runWorker 方法，执行任务，任务来自 Worker 中封装的 task，如为空，则从阻塞队列中获取任务。注意，这个线程 worker 在完成 worker 中封装的 task 后，会从阻塞队列中获取任务，直到阻塞队列为空，会判断是否要关闭该线程。
   
 - 获取当前线程，获取 Worker 中封装的任务 task；
 - 如果线程 worker 中没有任务，则使用 getTask() 从阻塞队列中获取任务；
 - 检查线程池是否在运行，不在运行则中断当前线程，取消任务的执行；
 - 线程池在运行，调用 task.run() 使用当前线程执行任务；
 - 任务执行完后，记录该 Worker 执行任务的个数，解锁，将 Worker 变为闲置 Worker； 
-- 当 getTask() 为空时，即阻塞队列中没任务执行，则调用 [processWorkerExit()](https://github.com/martin-1992/thread_pool_executor_analysis/blob/master/processWorkerExit.md) 回收线程 Worker，通过 completedAbruptly 变量来判断是否正常结束。
+- 当 getTask() 为空时，即阻塞队列中没任务执行，则调用 [processWorkerExit()](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/processWorkerExit.md) 回收线程 Worker，通过 completedAbruptly 变量来判断是否正常结束。
 
 ```java
     final void runWorker(Worker w) {
