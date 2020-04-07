@@ -1,9 +1,10 @@
 ## addWorker
-　　线程数 ctl 加一，为要执行的任务包装成 Worker 对象。调用该对象的 thread，执行 run 方法，具体流程如下。
+　　线程数 ctl 加一，将要执行的任务包装成 Worker 对象。调用该对象的 thread，执行 run 方法，具体流程如下。
 
 - 获取 ctl 和线程池的当前状态，判断线程池是否还在工作、符合创建线程条件；
 - 如线程池满足条件，还在工作，则使用自旋，判断线程池中的有效线程数是否小于最大容量，小于则使用 CAS 将 ctl 加一，即线程数加一；
-- 将任务包装成 Worker 对象，添加到 hashset 中。启动线程，调用 Worker 对象中的 thread，处理阻塞队列里的任务。
+- 将任务包装成 Worker 对象，添加到线程池 workers；
+- 启动线程，调用 Worker 对象中的 thread，处理传进 Wokrer 对象的任务。
 
 ![avatar](photo_4.png)
 
@@ -11,7 +12,7 @@
 
 ```java
     /**
-    * 为 worker 的集合对象
+    * 为 worker 的集合对象，即线程集合对象（线程池）
     */
     private final HashSet<Worker> workers = new HashSet<Worker>();
     
@@ -34,7 +35,7 @@
                    ! workQueue.isEmpty()))
                 return false;
             
-            // 使用自旋，保证创建线程成功
+            // 使用自旋，保证线程数加一成功
             for (;;) {
                 // 线程池中的有效线程数
                 int wc = workerCountOf(c);
@@ -59,6 +60,7 @@
         // 任务是否成功添加标识
         boolean workerAdded = false;
         Worker w = null;
+        // 线程数加一成功后，将任务包装成 worker，创建线程，添加到线程池 workers
         try {
             // 根据参数 firstTask 来创建 Worker 对象，在 Worker 构造函数中会调用线程工厂创建一个线程
             w = new Worker(firstTask);
@@ -91,7 +93,7 @@
                     // 解锁
                     mainLock.unlock();
                 }
-                // 当 worker 已经添加到 hashset 中，则启动线程，调用 worker 中的 run 方法
+                // 当 worker 已经添加到线程池 workers，则启动线程，调用 worker 中的 run 方法
                 if (workerAdded) {
                     t.start();
                     workerStarted = true;
