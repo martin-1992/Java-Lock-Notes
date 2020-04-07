@@ -1,23 +1,25 @@
 ### execute
-　　线程池的核心方法，[Worker 对象]()，为执行任务的线程，执行流程如下。
+　　线程池的核心方法，主要是添加任务到阻塞队列 workQueue.offer(command) 和创建线程执行任务 [addWorker](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/addWorker.md)。
 
-- workerCount < corePoolSize，则创建一个核心线程来执行新任务；
-- workerCount > corePoolSize，且阻塞队列 workQueue 没有满，则将任务添加到阻塞队列中；
-- workerCount >= corePoolSize && workerCount < maximumPoolSize，且阻塞队列已满，则创建一个线程来执行新任务；
-- workerCount >= maximumPoolSize，且阻塞队列已满，则执行 handler 的拒绝策略来处理该任务, 默认的处理方式是直接抛异常。
+- workerCount < corePoolSize，则创建一个核心线程来执行新任务 addWorker(command, true)；
+- workerCount > corePoolSize，且阻塞队列 workQueue 没有满，则将任务添加到阻塞队列中，workQueue.offer(command) 添加成功；
+- workerCount >= corePoolSize && workerCount < maximumPoolSize，且阻塞队列已满，则创建一个线程来执行新任务，addWorker(command, false)；
+- workerCount >= maximumPoolSize，且阻塞队列已满，则执行 handler 的拒绝策略来处理该任务, 默认的处理方式是直接抛异常，reject(command)。
 
 ```java
+    private final BlockingQueue<Runnable> workQueue;
+
     public void execute(Runnable command) {
         if (command == null)
             throw new NullPointerException();
         
         // 获取 ctl 的值
         int c = ctl.get();
-        // 如果线程池中的有效线程数小于 corePoolSize，调用 addWorker 方法创建核心线程来执行任务，直接返回
+        // 如果线程池中的有效线程数小于 corePoolSize，调用 addWorker 方法创建线程来执行任务，直接返回
         if (workerCountOf(c) < corePoolSize) {
             if (addWorker(command, true))
                 return;
-            // 创建核心线程失败，获取线程池的状态
+            // 创建线程失败，检查线程池的状态，看是否还在运行
             c = ctl.get();
         }
         // 线程池的有效线程数大于核心线程数，线程池在 Running 状态，阻塞队列也没满（使用 offer 方法来判断，
@@ -32,7 +34,7 @@
             else if (workerCountOf(recheck) == 0)
                 addWorker(null, false);
         }
-        // addWorker 创建 Worker 失败，则调用 reject 方法，false 为最大线程池的大小
+        // 到这里时，阻塞队列已满，尝试创建线程 addWorker 执行任务，如果创建失败，则执行拒绝策略
         else if (!addWorker(command, false))
             reject(command);
     }
