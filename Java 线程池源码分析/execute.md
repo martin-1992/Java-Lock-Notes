@@ -1,5 +1,5 @@
 ### execute
-　　线程池的核心方法，主要是添加任务到阻塞队列 workQueue.offer(command) 和创建线程执行任务 [addWorker](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/addWorker.md)。
+　　线程池的核心方法，主要是**添加任务到阻塞队列 workQueue.offer(command) 和创建线程执行任务 [addWorker](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/addWorker.md)。**
 
 - workerCount < corePoolSize，则创建一个核心线程来执行新任务 addWorker(command, true)；
 - workerCount > corePoolSize，且阻塞队列 workQueue 没有满，则将任务添加到阻塞队列中，workQueue.offer(command) 添加成功；
