@@ -3,7 +3,7 @@
 
 - 获取 ctl 和线程池的当前状态，判断线程池是否还在工作、符合创建线程条件；
 - 如线程池满足条件，还在工作，则使用自旋，判断线程池中的有效线程数是否小于最大容量，小于则使用 CAS 将 ctl 加一，即线程数加一；
-- 将任务包装成 Worker 对象，添加到线程池 workers；
+- 将任务包装成 [Worker 对象](https://github.com/martin-1992/Java-Lock-Notes/blob/master/Java%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/Worker.md)，添加到线程池 workers；
 - 启动线程，调用 Worker 对象中的 thread，处理传进 Wokrer 对象的任务。
 
 ![avatar](photo_4.png)
