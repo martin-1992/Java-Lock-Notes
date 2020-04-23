@@ -1,4 +1,9 @@
 ### ThreadLocalMap
+　　由多个 Entry 对象组成的数组，即 Entry[] 。
+
+- 初始大小为 2 的幂，默认为 16，可使用位运算获取下标；
+- 哈希冲突时，使用线性探测法，找下个索引值下标；
+- 负载因子为 2 / 3，达到 2 / 3的容量进行扩容。
 
 
 ```java
@@ -32,7 +37,7 @@ static class ThreadLocalMap {
     /**
      * 负载值，当达到该值，则进行扩容
      */
-    private int threshold; // Default to 0
+    private int threshold;
 
     /**
      * 调整负载值，负载因子为 2 / 3
