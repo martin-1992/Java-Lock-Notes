@@ -1,7 +1,7 @@
 ### get
 
-- 获取当前线程副本 ThreadLocalMap 中当前线程对应的变量值，保证线程安全；
-- 如果线程副本为空，则调用初始化，该方法会调用用户自定义方法 initialValue，即添加用户自定义的初始值。
+- 获取当前线程绑定的 ThreadLocalMap，key 为当前访问的 ThreadLocal 对象，从该 key 获取对应的 Entry；
+- 如果 ThreadLocalMap 为空，则调用初始化，该方法会调用用户自定义方法 initialValue，即添加用户自定义的初始值。
 
 ```java
     public T get() {
@@ -22,6 +22,18 @@
     }
 ```
 
+#### getMap
+　　线程对应的 ThreadLocalMap，注意，ThreadLocalMap 是线程绑定的。即每个线程都有一个 ThreadLocalMap，保证线程安全。
+
+```java
+    ThreadLocal.ThreadLocalMap threadLocals = null;
+
+    ThreadLocalMap getMap(Thread t) {
+        return t.threadLocals;
+    }
+```
+
+
 #### setInitialValue
 　　获取当前线程的 ThreadLocalMap，调用 [ThreadLoacalMap#set](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/set.md)，根据当前线程 key（ThreadLoacal） 从 ThreadLoacalMap 设置该 key 对应的变量值，变量值为用户自定义的初始值。
 
@@ -41,15 +53,6 @@
     
     protected T initialValue() {
         return null;
-    }
-```
-
-#### getMap
-　　线程对应的 ThreadLocalMap。
-
-```java
-    ThreadLocalMap getMap(Thread t) {
-        return t.threadLocals;
     }
 ```
 
