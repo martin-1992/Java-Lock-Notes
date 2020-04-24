@@ -1,5 +1,5 @@
 ### ThreadLocal
-　　ThreadLocalMap 结构如下图，Entry 的 key 为 ThreadLocal。即通过当前线程的 ThreadLocal 作为 key，从 ThreadLocalMap 中获取值。一个线程可以设置多个 ThreadLocal，即有多个 key，不建议设置多个 ThreadLocal，会造成哈希冲突。
+　　ThreadLocalMap 结构如下图，Entry 的 key 为 ThreadLocal。即通过当前线程的 ThreadLocal 作为 key，从 ThreadLocalMap 中获取值。一个线程可以设置多个 ThreadLocal，即有多个 key。**不建议设置多个 ThreadLocal，ThreadLocalMap 遇到哈希冲突时是使用线性探测法，会往后遍历找到下个值，变成 O(n) 操作。**
 
 - 每个线程都有各自的变量 threadLocals，类型为 ThreadLoacalMap，包含线程各自的本地变量；
 - ThreadLoacalMap 是由 Entry 对象的数组组成的，通过哈希值（步长为 0x61c88647，取下一个哈希值），使用位运算来获取索引下标，所以数组长度必须为 2 的次方；
