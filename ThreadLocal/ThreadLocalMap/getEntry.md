@@ -19,7 +19,7 @@
 
 #### getEntryAfterMiss
 　　哈希冲突时，使用线性探测法，会在当前索引，往下寻找下个值为空的索引，插入进去。<br />
-　　转换为寻找该 key（ThreadLocal） 时，同样是先找到当前 key 的索引值，在往下遍历寻找符合的 key。如果遍历到 key 为 null，调用 [expungeStaleEntry](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md)，清除所有 key 为 null 的 Entry，防止内存泄漏。
+　　转换为寻找该 key（ThreadLocal） 时，同样是先找到当前 key 的索引值，往后遍历寻找符合的 key。如果遍历到 key 为 null，调用 [expungeStaleEntry](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md)，清除所有 key 为 null 的 Entry，防止内存泄漏。
 
 ```java
     private Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
