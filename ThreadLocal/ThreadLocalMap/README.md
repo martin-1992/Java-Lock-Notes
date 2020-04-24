@@ -1,16 +1,14 @@
 ### ThreadLocalMap
-　　由多个 Entry 对象组成的数组，即 Entry[] 。
+　　由多个 Entry 对象组成的数组，即 Entry[]，一个 Entry 对应一个 ThreadLocal。
 
 - 初始大小为 2 的幂，默认为 16，可使用位运算获取下标；
 - 哈希冲突时，使用线性探测法，找下个索引值下标；
 - 负载因子为 2 / 3，达到 2 / 3的容量进行扩容。
 
-
 ```java
 static class ThreadLocalMap {
 
     static class Entry extends WeakReference<ThreadLocal<?>> {
-        /** The value associated with this ThreadLocal. */
         Object value;
 
         Entry(ThreadLocal<?> k, Object v) {
