@@ -1,7 +1,7 @@
 ### ThreadLocal
-　　ThreadLocalMap 结构如下图。
+　　ThreadLocalMap 结构如下图，Entry 的 key 为 ThreadLocal。即通过当前线程的 ThreadLocal 作为 key，从 ThreadLocalMap 中获取值。一个线程可以设置多个 ThreadLocal，即有多个 key，不建议设置多个 ThreadLocal，会造成哈希冲突。
 
-- 每个线程都有各自的 ThreadLoacalMap，包含线程各自的本地变量；
+- 每个线程都有各自的变量 threadLocals，类型为 ThreadLoacalMap，包含线程各自的本地变量；
 - ThreadLoacalMap 是由 Entry 对象的数组组成的，通过哈希值（步长为 0x61c88647，取下一个哈希值），使用位运算来获取索引下标，所以数组长度必须为 2 的次方；
 - Entry 对象，为弱引用（WeakReferences）。是由 Key 和 value 组成，key 为 ThreadLocal，value 为当前线程要存的本地变量值。因为是 Entry 是弱引用，存在 key 为 null（被 GC 回收了），但 value 不为 null，所以需要手动回收，防止内存泄漏。
 
@@ -50,10 +50,15 @@ public class ThreadLocal<T> {
 　　弱引用会在下次 GC 被回收，如果该对象仅仅被弱引用关联，即 ThreadLocalMap 中的 Entry 的 key 指向 ThreadLocal 时，没有其它指向 ThreadLocal，ThreadLocal 会被回收。ThreadLocal 被回收后，Entry 的 key 为 null，但 Entry 不为 null，因为 Entry 是强引用，Entry 的 值还存在，所以需要手动回收。
 
 ### [get](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/get.md)
-　　获取当前线程副本 ThreadLocalMap，根据当前线程 key（ThreadLoacal）获取对应的变量值。
+
+- 获取当前线程绑定的 threadLocals，为 ThreadLocalMap；
+- 将当前线程的 ThreadLoacal 作为 key，计算其哈希值；
+- 根据哈希值（索引值），获取 ThreadLocalMap（Entry 数组）中对应的 Entry。Entry 由 ThreadLoacal 和要保存的值组成；
+- 检查该 Entry 的 key 是否等于当前线程的 ThreadLoacal，是则获取该 Entry 的值。不是，则哈希冲突了，找到下一个 Entry，比较 key，继续获取；
+- 当前线程的其他 ThreadLoacal，重复上面流程，计算 ThreadLoacal 的哈希值（索引值），从 ThreadLocalMap 中获取 Entry，获取 Entry 的值。
 
 ### [set](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/set.md)
-　　获取当前线程副本 ThreadLocalMap，根据当前线程 key（ThreadLoacal）设置对应的变量值。
+　　流程和上面同样。
 
 ### [remove](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/remove.md)
 　　获取当前线程副本 ThreadLocalMap，删除当前线程 key（ThreadLoacal）和其对应的变量值。
