@@ -46,8 +46,23 @@ public class ThreadLocal<T> {
 }
 ```
 
-### 弱引用
-　　弱引用会在下次 GC 被回收，如果该对象仅仅被弱引用关联，即 ThreadLocalMap 中的 Entry 的 key 指向 ThreadLocal 时，没有其它指向 ThreadLocal，ThreadLocal 会被回收。ThreadLocal 被回收后，Entry 的 key 为 null，但 Entry 不为 null，因为 Entry 是强引用，Entry 的 值还存在，所以需要手动回收。
+### 弱引用 WeakReference
+　　Entry 中的 key（ThreadLocal）由弱引用修饰，在下次 GC 会被回收，即 **ThreadLocalMap 中的 Entry 的 key 指向 ThreadLocal 时，没有其它指向 ThreadLocal，ThreadLocal 会被回收。** 当 Entry 的 key（ThreadLocal）被回收变为 null，Entry 的 value 还在，这时需要手动回收。ThreadLocal 在 get() 和 set() 时，都会检查是否有 Entry 的 key 为 null，是则调用 [expungeStaleEntries](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/ThreadLocalMap/expungeStaleEntry.md) 进行回收。
+
+```java
+    static class Entry extends WeakReference<ThreadLocal<?>> {
+        /** The value associated with this ThreadLocal. */
+        Object value;
+
+        Entry(ThreadLocal<?> k, Object v) {
+            super(k);
+            value = v;
+        }
+    }
+```
+
+- get，在获取值时，如果 key 为 null，则会调用 expungeStaleEntries 删除该 key 和对应的 Entry，防止内存泄漏。
+- set，在设置值时，遇到哈希冲突，会采取线性探测法，往后遍历找到与该 key 相等的 Entry。如果遇到 key 为 null，则调用 expungeStaleEntries 删除该 key 和对应的 Entry，防止内存泄漏。
 
 ### [get](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/get.md)
 
@@ -61,4 +76,4 @@ public class ThreadLocal<T> {
 　　流程和上面同样。
 
 ### [remove](https://github.com/martin-1992/Java-Lock-Notes/blob/master/ThreadLocal/remove.md)
-　　获取当前线程副本 ThreadLocalMap，删除当前线程 key（ThreadLoacal）和其对应的变量值。
+　　从对象 Entry 数组中移除某个 key（ThreadLoacal）和对应的变量值。
