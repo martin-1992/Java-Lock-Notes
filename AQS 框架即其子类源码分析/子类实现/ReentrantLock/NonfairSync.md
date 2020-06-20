@@ -1,21 +1,22 @@
 ## NonfairSync
 　　非公平锁，这里新线程使用 CAS 来获取同步状态（锁），如果同步状态已经释放（CAS 的 expect 为 0），这时可直接获得锁，而这对那些已经在同步队列中排队的线程就显得不公平，这是非公平锁来源的第一点。
-  
+
+- compareAndSetState，新线程使用 CAS 来获取锁；
+- acquire，获取锁失败，则调用该方法，进入 AQS 框架设定好的流程。
+  1. tryAcquire，新线程再次尝试使用 CAS 获取锁；
+  2. addWaiter，还是失败，则将其包装成节点，使用 CAS 将该节点加入到同步队列的尾部。
+
 ```java
 static final class NonfairSync extends Sync {
     private static final long serialVersionUID = 7316153563782823691L;
 
-    /**
-     * Performs lock.  Try immediate barge, backing up to normal
-     * acquire on failure.
-     */
     final void lock() {
-        // 新线程使用 CAS 来获取锁并改变 state 状态，当锁为 0 时，则更新为 1，即获取到锁
+        // 新线程使用 CAS 来获取锁并改变 state 状态，当锁为 0 时（已释放），则更新为 1（获取锁）
         if (compareAndSetState(0, 1))
             // 获取成功，则设置当前线程获得独占锁
             setExclusiveOwnerThread(Thread.currentThread());
         else
-            // 获取不成功，则调用 CAS 框架的 acquire 方法来获取
+            // 获取不成功，则调用 CAS 框架的 acquire 方法来获取，该方法在获取不到锁后，会将新线程加入等待队列中
             acquire(1);
     }
     
