@@ -17,13 +17,11 @@ static final class FairSync extends Sync {
 　　返回 true 有两种情况，只有 false 才可以继续尝试获取锁，true 是将当前线程包装成节点添加到同步队列末尾。
   
 - 同步队列不为空，有等待的节点（线程），且头节点的下个节点为空；
-- 同步队列不为空，节点线程不为当前线程。
-　　
+- 同步队列不为空，节点线程不为当前线程，当前线程要加入等待队列。
+
 ```java
 public final boolean hasQueuedPredecessors() {
-    // The correctness of this depends on head being initialized
-    // before tail and on head.next being accurate if the current
-    // thread is first in queue.
+
     Node t = tail; // Read fields in reverse initialization order
     Node h = head;
     Node s;
