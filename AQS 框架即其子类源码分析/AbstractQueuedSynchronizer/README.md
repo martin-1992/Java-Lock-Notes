@@ -45,7 +45,7 @@ protected boolean tryReleaseShared(int arg) {
 　　同步队列是一个 FIFO 双向队列，AQS 通过它来完成同步状态的管理。当前线程获取同步状态失败时，AQS 会将当前线程以及等待状态等信息构造成一个节点（Node），并将其加入到同步队列，同时会阻塞当前线程。当同步状态释放时，会把首节点中的线程唤醒（公平锁），使其再次尝试获取同步状态（锁）。<br />
 　　在同步队列中，一个节点表示一个线程，节点保存着获取同步状态（锁）失败的线程引用（thread）、等待状态（waitStatus）、前节点（prev）、后节点（next）。
 
-#### [节点 Node](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/AbstractQueuedSynchronizer/node.md)
+### [节点 Node](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/AbstractQueuedSynchronizer/node.md)
 　　通过节点构成同步队列，如下图，同步队列是拥有头节点和尾节点的链表，遵循先进先出原则。<br />
 　　头节点是获取同步状态成功的节点，头节点的线程在释放同步状态时，将会唤醒后续节点，而后续节点在获取同步状态成功时，会将自己设置为头节点。
 
@@ -53,4 +53,10 @@ protected boolean tryReleaseShared(int arg) {
 
 ### [addWaiter](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/AbstractQueuedSynchronizer/addWaiter.md)
 　　获取锁失败后，执行该方法，**将当前无法获得锁的线程包装为一个节点 Node，使用 compareAndSetTail 添加到同步队列尾部，** expect 为传入当前线程认为的尾节点，update 为要添加的节点。
+
+### [acquireQueued](https://github.com/martin-1992/Java-Lock-Notes/blob/master/AQS%20%E6%A1%86%E6%9E%B6%E5%8D%B3%E5%85%B6%E5%AD%90%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E7%8B%AC%E5%8D%A0%E5%BC%8F%E9%94%81/acquire.md)
+　　addWaiter 会返回一个包装了线程的节点 Node，
+  
+  
+  acquireQueued会把放入队列中的线程不断去获取锁，直到获取成功或者不再需要获取（中断）。
 
