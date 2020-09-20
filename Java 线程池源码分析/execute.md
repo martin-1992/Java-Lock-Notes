@@ -3,8 +3,8 @@
 
 - workerCount < corePoolSize，则创建一个核心线程来执行新任务 addWorker(command, true)；
 - workerCount > corePoolSize，且阻塞队列 workQueue 没有满，则将任务添加到阻塞队列中，workQueue.offer(command) 添加成功；
-- workerCount >= corePoolSize && workerCount < maximumPoolSize，且阻塞队列已满，则创建一个线程来执行新任务，addWorker(command, false)；
-- workerCount >= maximumPoolSize，且阻塞队列已满，则执行 handler 的拒绝策略来处理该任务, 默认的处理方式是直接抛异常，reject(command)。
+- workerCount >= corePoolSize && workerCount < maximumPoolSize(线程数量小于最大线程数)，且阻塞队列已满，则创建一个线程来执行新任务，addWorker(command, false)；
+- workerCount >= maximumPoolSize(线程数量大宇等于最大线程数)，且阻塞队列已满，则执行 handler 的拒绝策略来处理该任务, 默认的处理方式是直接抛异常，reject(command)。
 
 ```java
     private final BlockingQueue<Runnable> workQueue;
